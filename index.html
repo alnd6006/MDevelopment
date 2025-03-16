@@ -11,6 +11,8 @@
             --dark: #121212;
             --light: #f5f5f5;
             --success: #4caf50;
+            --warning: #ff9800;
+            --error: #f44336;
         }
         
         * {
@@ -119,6 +121,16 @@
         .btn:hover {
             background-color: var(--secondary);
             transform: translateY(-2px);
+        }
+        
+        .btn-disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+        
+        .btn-disabled:hover {
+            background-color: #555;
+            transform: none;
         }
         
         .scripts-section {
@@ -294,6 +306,13 @@
             color: var(--light);
         }
         
+        .form-error {
+            color: var(--error);
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: none;
+        }
+        
         .purchase-summary {
             margin-top: 20px;
             padding-top: 20px;
@@ -316,6 +335,70 @@
             display: none;
             text-align: center;
             color: var(--success);
+        }
+        
+        .processing-payment {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--primary);
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .download-section {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .download-btn {
+            margin-top: 15px;
+        }
+        
+        .payment-fields {
+            display: none;
+            margin-top: 10px;
+        }
+        
+        .payment-fields.active {
+            display: block;
+        }
+        
+        .copy-field {
+            position: relative;
+            margin-top: 10px;
+        }
+        
+        .copy-field input {
+            width: 100%;
+            padding-right: 40px;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            background: none;
+            border: none;
+            color: var(--light);
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .copy-btn:hover {
+            color: var(--primary);
         }
     </style>
 </head>
@@ -397,58 +480,32 @@
             <span class="close-modal" onclick="closePurchaseModal()">&times;</span>
             <h2>Purchase Advanced Car HUD</h2>
             <div id="purchaseForm">
-                <form class="purchase-form" onsubmit="simulatePurchase(event)">
+                <form class="purchase-form" id="scriptPurchaseForm" onsubmit="processPayment(event)">
                     <div class="form-group">
-                        <label for="email">Email</label>
+                        <label for="email">Email Address</label>
                         <input type="email" id="email" required>
+                        <div class="form-error" id="emailError">Please enter a valid email address</div>
                     </div>
                     <div class="form-group">
                         <label for="payment">Payment Method</label>
-                        <select id="payment">
+                        <select id="payment" onchange="togglePaymentFields()">
                             <option value="paypal">PayPal</option>
-                            <option value="stripe">Credit Card</option>
+                            <option value="credit">Credit Card</option>
                             <option value="crypto">Cryptocurrency</option>
                         </select>
                     </div>
-                    <div class="purchase-summary">
-                        <div class="summary-row">
-                            <span>Advanced Car HUD</span>
-                            <span>$24.99</span>
-                        </div>
-                        <div class="summary-row total">
-                            <span>Total</span>
-                            <span>$24.99</span>
+                    
+                    <!-- PayPal Fields -->
+                    <div id="paypalFields" class="payment-fields active">
+                        <div class="form-group">
+                            <label for="paypalEmail">PayPal Email</label>
+                            <input type="email" id="paypalEmail">
+                            <div class="form-error" id="paypalEmailError">Please enter your PayPal email</div>
                         </div>
                     </div>
-                    <button type="submit" class="btn">Complete Purchase</button>
-                </form>
-            </div>
-            <div id="successMessage" class="success-message">
-                <h3>Thank you for your purchase!</h3>
-                <p>An email with download instructions has been sent to your email address.</p>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        function openPurchaseModal() {
-            document.getElementById('purchaseModal').style.display = 'flex';
-        }
-        
-        function closePurchaseModal() {
-            document.getElementById('purchaseModal').style.display = 'none';
-            document.getElementById('purchaseForm').style.display = 'block';
-            document.getElementById('successMessage').style.display = 'none';
-        }
-        
-        function simulatePurchase(event) {
-            event.preventDefault();
-            document.getElementById('purchaseForm').style.display = 'none';
-            document.getElementById('successMessage').style.display = 'block';
-            setTimeout(() => {
-                closePurchaseModal();
-            }, 5000);
-        }
-    </script>
-</body>
-</html>
+                    
+                    <!-- Credit Card Fields -->
+                    <div id="creditFields" class="payment-fields">
+                        <div class="form-group">
+                            <label for="cardNumber">Card Number</label>
+                            <input type="text" id="cardNumber" placeholder="XXXX XXXX XXXX XXXX">
